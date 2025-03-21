@@ -1,0 +1,148 @@
+[3/21, 7:01 AM]  #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define SIZE 5
+
+char keySquare[SIZE][SIZE];
+
+void createKeySquare(char key[]) {
+    int map[26] = {0}, k = 0;
+    for (int i = 0; key[i]; i++) {
+        if (key[i] == 'J') key[i] = 'I';
+        if (!map[key[i] - 'A']) keySquare[k / SIZE][k % SIZE] = key[i], map[key[i] - 'A'] = 1, k++;
+    }
+    for (char c = 'A'; c <= 'Z'; c++)
+        if (c != 'J' && !map[c - 'A']) keySquare[k / SIZE][k % SIZE] = c, k++;
+}
+
+void findPos(char ch, int *r, int *c) {
+    if (ch == 'J') ch = 'I';
+    for (int i = 0; i < SIZE; i++)
+        for (int j = 0; j < SIZE; j++)
+            if (keySquare[i][j] == ch) *r = i, *c = j;
+}
+
+void encrypt(char text[]) {
+    int r1, c1, r2, c2;
+    for (int i = 0; text[i]; i += 2) {
+        findPos(text[i], &r1, &c1), findPos(text[i + 1], &r2, &c2);
+        text[i] = (r1 == r2) ? keySquare[r1][(c1 + 1) % SIZE] : (c1 == c2) ? keySquare[(r1 + 1) % SIZE][c1] : keySquare[r1][c2];
+        text[i + 1] = (r1 == r2) ? keySquare[r2][(c2 + 1) % SIZE] : (c1 == c2) ? keySquare[(r2 + 1) % SIZE][c2] : keySquare[r2][c1];
+    }
+}
+
+void formatText(char text[]) {
+    char formatted[100] = "";
+    int j = 0;
+    for (int i = 0; text[i]; i++) {
+        if (text[i] == 'J') text[i] = 'I';
+        formatted[j++] = text[i];
+        if (text[i] == text[i + 1]) formatted[j++] = 'X';
+    }
+    if (j % 2) formatted[j++] = 'X';
+    formatted[j] = '\0';
+    strcpy(text, formatted);
+}
+
+int main() {
+    char key[25], text[100];
+    scanf("%s%s", key, text);
+    for (int i = 0; key[i]; i++) key[i] = toupper(key[i]);
+    for (int i = 0; text[i]; i++) text[i] = toupper(text[i]);
+    createKeySquare(key);
+    formatText(text);
+    encrypt(text);
+    printf("%s\n", text);
+    return 0;
+}
+[3/21, 7:08 AM] : #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+char F[] = "ETAOINSHRDLCUMWFGYPBVKJXQZ", T[1000], R[1000], M[26]; 
+int FQ[26] = {0};
+
+int main() {
+    fgets(T, sizeof(T), stdin);
+    for (char *t = T; *t; t++) if (isalpha(*t)) FQ[toupper(*t) - 'A']++;
+    for (int i = 0; i < 26; i++) M[i] = 'A' + i;
+    for (int i = 0; i < 25; i++) for (int j = i + 1; j < 26; j++)
+        if (FQ[i] < FQ[j]) { int x = FQ[i]; FQ[i] = FQ[j]; FQ[j] = x;
+        char c = M[i]; M[i] = M[j]; M[j] = c; }
+    for (int i = 0; i < 10; i++) {
+        for (char *t = T, *o = R; *t; t++) *o++ = isalpha(*t) ? F[strchr(M, toupper(*t)) - M] : *t;
+        *o = '\0';
+        printf("Plaintext %d: %s", i + 1, R);
+        char x = F[i]; F[i] = F[i + 1]; F[i + 1] = x;
+    }
+}
+[3/21, 7:13 AM] : #include <stdio.h>
+
+#include <string.h>
+
+
+
+char keys[16][48]; // 16 keys (each 48-bit)
+
+void generateKeys() { for (int i = 0; i < 16; i++) sprintf(keys[i], "K%d", 16 - i); }
+
+
+
+void desDecrypt(char *cipher) {
+
+    printf("Cipher: %s\n", cipher);
+
+    for (int i = 0; i < 16; i++) printf("Round %d using %s\n", i + 1, keys[i]);
+
+    printf("Decrypted Text: %s\n", cipher); // Simulating decryption
+
+}
+
+
+
+int main() {
+
+    char cipher[] = "ENCRYPTED"; 
+
+    generateKeys();
+
+    desDecrypt(cipher);
+
+}
+[3/21, 7:13 AM] : #include <stdio.h>
+
+
+
+int modInverse(int e, int phi) {
+
+    int t = 0, newT = 1, r = phi, newR = e, q, temp;
+
+    while (newR) q = r / newR, temp = t, t = newT, newT = temp - q * newT, temp = r, r = newR, newR = temp - q * newR;
+
+    return t < 0 ? t + phi : t;
+
+}
+
+
+
+int main() {
+
+    int n = 3599, e = 31, p = 59, q = 61, phi = (p - 1) * (q - 1);
+
+    printf("d = %d\n", modInverse(e, phi));
+
+}
+
+#include <stdio.h>
+
+int modInverse(int e, int phi) {
+    int t = 0, newT = 1, r = phi, newR = e, q, temp;
+    while (newR) q = r / newR, temp = t, t = newT, newT = temp - q * newT, temp = r, r = newR, newR = temp - q * newR;
+    return t < 0 ? t + phi : t;
+}
+
+int main() {
+    int n = 3599, e = 31, p = 59, q = 61, phi = (p - 1) * (q - 1);
+    printf("d = %d\n", modInverse(e, phi));
+}
